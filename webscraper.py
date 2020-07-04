@@ -1,5 +1,6 @@
-from bs4 import BeautifulSoup
-import requests
+from selenium import webdriver
+import os
+import sys
 
 baseUrl = "https://iknow.jp/courses/"
 subpages = list(range(566921, 566933))
@@ -9,12 +10,26 @@ subpages += list(range(615947, 615960))
 subpages += list(range(616077, 616087))
 subpages += list(range(598422, 598435))
 
-# for i in subpages:
 fullUrl = baseUrl + str(566921)
 print(fullUrl + "\n")
-html_content = requests.get(fullUrl).text
-soup = BeautifulSoup(html_content, "lxml")
+japaneseWords = []
+englishWords = []
 
-print(soup.prettify())
+driver = webdriver.Chrome(os.path.join(sys.path[0], "chromedriver.exe"))  # can be Firefox(), PhantomJS() and more
+driver.get(fullUrl)
+
+for element in driver.find_elements_by_class_name('text'):
+    japaneseWords.append(element.text)
+
+for element in driver.find_elements_by_class_name('response'):
+    englishWords.append(element.text)
+
+print(japaneseWords)
+print(englishWords)
+print(len(japaneseWords))
+print(len(englishWords))
+
+driver.close()
+
 
 input("Press Enter to continue...")
