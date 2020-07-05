@@ -42,11 +42,42 @@ for element in driver.find_elements_by_class_name('part-of-speech'):
 driver.close()
 
 # Split the japaneseText array into words and sentence examples
+transliteration = [item for item in transliteration if not item.startswith('[')]
+
+print("Length of transliteration: ")
+print(len(transliteration))
+
+
+
 japaneseWords = japaneseText[0::3]
 sentenceExample1 = japaneseText[1::3]
 sentenceExample2 = japaneseText[2::3]
 transliteration1 = transliteration[1::3]
 transliteration2 = transliteration[2::3]
+translation1 = translation[0::2]
+translation2 = translation[1::2]
+
+
+print("\njpwords\n")
+print(len(japaneseWords))
+print("\nengwords\n")
+print(len(englishWords))
+print("\nex1\n")
+print(len(sentenceExample1))
+print("\nex2\n")
+print(len(sentenceExample2))
+print("\ntran1\n")
+print(len(transliteration1))
+print("\ntran2\n")
+print(len(transliteration2))
+print("\npart\n")
+print(len(partOfSpeech))
+print("\ntranslation1\n")
+print(len(translation1))
+print("\ntranslation2\n")
+print(len(translation2))
+
+print(transliteration)
 
 # Save the result in the CSV file
 with open('Most common words.xlsx', 'w') as f:
