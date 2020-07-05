@@ -1,6 +1,7 @@
 from selenium import webdriver
 import os
 import sys
+import xlsxwriter
 
 # Prepare the urls
 baseUrl = "https://iknow.jp/courses/"
@@ -41,49 +42,54 @@ for element in driver.find_elements_by_class_name('part-of-speech'):
 
 driver.close()
 
-# Split the japaneseText array into words and sentence examples
+# Remove the word instances from the array
 transliteration = [item for item in transliteration if not item.startswith('[')]
 
-print("Length of transliteration: ")
-print(len(transliteration))
-
-
-
+# Split the japaneseText array into words and sentence examples
 japaneseWords = japaneseText[0::3]
 sentenceExample1 = japaneseText[1::3]
 sentenceExample2 = japaneseText[2::3]
-transliteration1 = transliteration[1::3]
-transliteration2 = transliteration[2::3]
+transliteration1 = transliteration[0::2]
+transliteration2 = transliteration[1::2]
 translation1 = translation[0::2]
 translation2 = translation[1::2]
 
+numberOfWords = len(japaneseWords)
 
-print("\njpwords\n")
-print(len(japaneseWords))
-print("\nengwords\n")
-print(len(englishWords))
-print("\nex1\n")
-print(len(sentenceExample1))
-print("\nex2\n")
-print(len(sentenceExample2))
-print("\ntran1\n")
-print(len(transliteration1))
-print("\ntran2\n")
-print(len(transliteration2))
-print("\npart\n")
-print(len(partOfSpeech))
-print("\ntranslation1\n")
-print(len(translation1))
-print("\ntranslation2\n")
-print(len(translation2))
+if (len(englishWords) == numberOfWords and len(sentenceExample1) == numberOfWords and len(sentenceExample2) == numberOfWords and 
+    len(transliteration1) == numberOfWords and len(transliteration2) == numberOfWords and len(translation1) == numberOfWords and
+    len(translation2) == numberOfWords and len(partOfSpeech) == numberOfWords):
+    
+    # Save the result in the XLSX file
+    workbook = xlsxwriter.Workbook('Most common words.xlsx')
+    worksheet = workbook.add_worksheet()
+    worksheet.write(0, 0, 'Japanese word')
+    worksheet.write(0, 1, 'English word')
+    worksheet.write(0, 2, 'Part of speech')
+    worksheet.write(0, 3, 'Sentence example 1')
+    worksheet.write(0, 4, 'Transliteration')
+    worksheet.write(0, 5, 'Translation')
+    worksheet.write(0, 6, 'Sentence example 2')
+    worksheet.write(0, 7, 'Transliteration')
+    worksheet.write(0, 8, 'Translation')
 
-print(transliteration)
-
-# Save the result in the CSV file
-with open('Most common words.xlsx', 'w') as f:
-    for line in s:
-        f.write(line)
-
+    for i in range(0,numberOfWords):
+        worksheet.write(i, 0, japaneseWords[i])
+        worksheet.write(i, 1, englishWords[i])
+        worksheet.write(i, 2, partOfSpeech[i])
+        worksheet.write(i, 3, sentenceExample1[i])
+        worksheet.write(i, 4, transliteration1[i])
+        worksheet.write(i, 5, translation1[i])
+        worksheet.write(i, 6, sentenceExample2[i])
+        worksheet.write(i, 7, transliteration2[i])
+        worksheet.write(i, 8, translation2[i])
+    
+    workbook.close()
+else:
+    print("Number of items don't match between arrays")
 
 
 input("Press Enter to continue...")
+
+
+worksheet.write('B3', u'Это фраза на русском!')
