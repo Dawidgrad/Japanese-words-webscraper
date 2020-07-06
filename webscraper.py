@@ -3,18 +3,33 @@ def getData(siteUrl):
     driver = webdriver.Chrome(os.path.join(sys.path[0], "chromedriver.exe"))  # can be Firefox(), PhantomJS() and more
     driver.get(siteUrl)
 
-
+    processedExample2 = False
     for element in driver.find_elements_by_class_name('text'):
-        japaneseText.append(element.text)
+        parentElement = element.find_element_by_xpath('..')
+
+        if (parentElement.get_attribute('class') == 'cue-response'):
+            japaneseWords.append(element.text)            
+            processedExample2 = False
+        elif len(japaneseWords) != len(sentenceExample1):
+            # Add sentence example, transliteration and translation
+            transliterationElement = parentElement.find_element_by_class_name('transliteration')
+            translationElement = parentElement.find_element_by_class_name('translation')
+            sentenceExample1.append(element.text)
+            transliteration1.append(transliterationElement.text)
+            translation1.append(translationElement.text)
+        elif processedExample2 == False:
+            # Add sentence example, transliteration and translation
+            transliterationElement = parentElement.find_element_by_class_name('transliteration')
+            translationElement = parentElement.find_element_by_class_name('translation')
+            sentenceExample2.append(element.text)
+            transliteration2.append(transliterationElement.text)
+            translation2.append(translationElement.text)
+        else:
+            continue
+            
 
     for element in driver.find_elements_by_class_name('response'):
         englishWords.append(element.text)
-
-    for element in driver.find_elements_by_class_name('transliteration'):
-        transliteration.append(element.text)
-
-    for element in driver.find_elements_by_class_name('translation'):
-        translation.append(element.text)
 
     for element in driver.find_elements_by_class_name('part-of-speech'):
         partOfSpeech.append(element.text)
@@ -26,9 +41,8 @@ def getData(siteUrl):
 def writeDataToXlsx(wordCount, rowCount, worksheet):
     numberOfWords = len(japaneseWords)
 
-    if (len(englishWords) == numberOfWords and len(sentenceExample1) == numberOfWords and len(sentenceExample2) == numberOfWords and 
-        len(transliteration1) == numberOfWords and len(transliteration2) == numberOfWords and len(translation1) == numberOfWords and
-        len(translation2) == numberOfWords and len(partOfSpeech) == numberOfWords):
+    if (len(englishWords) == numberOfWords and len(sentenceExample1) == numberOfWords and 
+        len(transliteration1) == numberOfWords and len(translation1) == numberOfWords and len(partOfSpeech) == numberOfWords):
         
         # Save the result in the XLSX file
         worksheet.write(rowCount, 0, 'Top {}'.format(wordCount))
@@ -52,9 +66,10 @@ def writeDataToXlsx(wordCount, rowCount, worksheet):
             worksheet.write(rowCount, 3, sentenceExample1[i])
             worksheet.write(rowCount, 4, transliteration1[i])
             worksheet.write(rowCount, 5, translation1[i])
-            worksheet.write(rowCount, 6, sentenceExample2[i])
-            worksheet.write(rowCount, 7, transliteration2[i])
-            worksheet.write(rowCount, 8, translation2[i])
+            if (i < len(sentenceExample2)):
+                worksheet.write(rowCount, 6, sentenceExample2[i])
+                worksheet.write(rowCount, 7, transliteration2[i])
+                worksheet.write(rowCount, 8, translation2[i])
             rowCount += 1
 
     else:
@@ -89,8 +104,6 @@ for subpage in subpages:
     japaneseText = []
     japaneseWords = []
     englishWords = []
-    transliteration = []
-    translation = []
     partOfSpeech = []
     sentenceExample1 = []
     sentenceExample2 = []
@@ -102,37 +115,15 @@ for subpage in subpages:
     # Get the page data
     getData(fullUrl)
     
-    # Remove the word instances from the array
-    transliteration = [item for item in transliteration if not item.startswith('[')]
+    if (len(japaneseWords) != 0):
+        # Remove the word instances from the array
+        transliteration1 = [item for item in transliteration1 if not item.startswith('[')]
+        transliteration2 = [item for item in transliteration2 if not item.startswith('[')]
 
-    # Split the japaneseText array into words and sentence examples
-    # japaneseWords = japaneseText[0::3]
-    # sentenceExample1 = japaneseText[1::3]
-    # sentenceExample2 = japaneseText[2::3]
-
-    processedExample2 = False
-
-    for element in japaneseText:
-        if '[' in element:
-            japaneseWords.append(element)
-            processedExample2 = False
-        elif len(japaneseWords) != len(sentenceExample1):
-            sentenceExample1.append(element)
-        elif processedExample2 == False:
-            sentenceExample2.append(element)
-            processedExample2 = True
-        else:
-            continue
-
-    transliteration1 = transliteration[0::2]
-    transliteration2 = transliteration[1::2]
-    translation1 = translation[0::2]
-    translation2 = translation[1::2]
-
-    # Write the data to the file    
-    rowCount = writeDataToXlsx(wordCount, rowCount, worksheet)
-    rowCount += 4
-    wordCount += 100
+        # Write the data to the file    
+        rowCount = writeDataToXlsx(wordCount, rowCount, worksheet)
+        rowCount += 4
+        wordCount += 100
 
 workbook.close()
 
